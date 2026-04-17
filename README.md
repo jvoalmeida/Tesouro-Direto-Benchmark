@@ -1,6 +1,6 @@
 # Tesouro Direto Benchmark
 
-[**🚀 Acesse a aplicação aqui**](https://jvoalmeida.github.io/Tesouro-Direto-Benchmark/)
+## [🚀 Acesse a aplicação aqui](https://jvoalmeida.github.io/Tesouro-Direto-Benchmark/)
 
 Ferramenta para comparar o **valor de venda dos títulos do Tesouro Direto com marcação a mercado** em relação ao **valor que o título teria se estivesse rendendo apenas pela taxa Selic diária** desde a data de compra (dados do Banco Central). Isso permite avaliar se vale a pena vender antecipadamente ou manter o título até o vencimento.
 
