@@ -21,23 +21,30 @@ export function BondCard({ extract, showValues }: BondCardProps) {
   const diffPct = selicUpdated > 0 ? (diff / selicUpdated) * 100 : 0;
 
   let avgRate = "";
+  let avgPrice = "";
   if (extract.purchases.length > 0) {
     let prefix = "";
     let totalInvested = 0;
-    let weightedSum = 0;
-    let valid = true;
+    let weightedSumRate = 0;
+    let totalPriceWeighted = 0;
+    let totalQty = 0;
+    let rateValid = true;
 
     for (const p of extract.purchases) {
+      // For Price Weighted Average
+      totalPriceWeighted += p.priceAtPurchase * p.quantity;
+      totalQty += p.quantity;
+
+      // For Rate Weighted Average
       if (!p.contractedRate) {
-        valid = false;
-        break;
+        rateValid = false;
+        continue;
       }
       
-      // Matches things like "IPCA + 5,50%", "SELIC + 0,107%", "10,50%"
       const match = p.contractedRate.match(/^(.*?)\s*([\d,]+)%?$/);
       if (!match) {
-        valid = false; /* Could not parse the number */
-        break;
+        rateValid = false;
+        continue;
       }
 
       if (!prefix && match[1]) {
@@ -46,18 +53,22 @@ export function BondCard({ extract, showValues }: BondCardProps) {
 
       const num = parseFloat(match[2].replace(",", "."));
       if (isNaN(num)) {
-        valid = false;
-        break;
+        rateValid = false;
+        continue;
       }
 
-      // Weight by invested value
       totalInvested += p.investedValue;
-      weightedSum += num * p.investedValue;
+      weightedSumRate += num * p.investedValue;
     }
 
-    if (valid && totalInvested > 0) {
-      const avg = weightedSum / totalInvested;
+    if (rateValid && totalInvested > 0) {
+      const avg = weightedSumRate / totalInvested;
       avgRate = `${prefix}${avg.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`;
+    }
+
+    if (totalQty > 0) {
+      const avgP = totalPriceWeighted / totalQty;
+      avgPrice = formatCurrency(avgP);
     }
   }
 
@@ -86,6 +97,7 @@ export function BondCard({ extract, showValues }: BondCardProps) {
             <span>{extract.purchases.length} compras</span>
             <span>Qtd: {maskValue(extract.totalQuantity.toFixed(2), showValues)}</span>
             {avgRate && <span>Taxa Média: {avgRate}</span>}
+            {avgPrice && <span>Preço Médio: {maskValue(avgPrice, showValues)}</span>}
           </div>
         </div>
 

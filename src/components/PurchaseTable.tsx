@@ -26,6 +26,7 @@ export function PurchaseTable({ purchases, showValues }: PurchaseTableProps) {
           <tr className="border-b border-border bg-muted/50">
             <th className="px-3 py-2.5 text-left font-semibold text-muted-foreground align-bottom leading-tight">Data<br/>Compra</th>
             <th className="px-3 py-2.5 text-right font-semibold text-muted-foreground align-bottom leading-tight">Qtd</th>
+            <th className="px-3 py-2.5 text-right font-semibold text-muted-foreground align-bottom leading-tight">Preço<br/>Compra</th>
             <th className="px-3 py-2.5 text-right font-semibold text-muted-foreground align-bottom leading-tight">Valor<br/>Investido</th>
             {hasSelicData && (
               <th className="px-3 py-2.5 text-right font-semibold text-muted-foreground align-bottom leading-tight">
@@ -55,6 +56,7 @@ export function PurchaseTable({ purchases, showValues }: PurchaseTableProps) {
               >
                 <td className="px-3 py-2 font-mono text-xs">{p.date}</td>
                 <td className="px-3 py-2 text-right font-mono text-xs">{maskValue(p.quantity.toFixed(2), showValues)}</td>
+                <td className="px-3 py-2 text-right font-mono text-xs">{maskValue(formatCurrency(p.priceAtPurchase), showValues)}</td>
                 <td className="px-3 py-2 text-right font-mono text-xs">{maskValue(formatCurrency(p.investedValue), showValues)}</td>
                 {hasSelicData && (
                   <td className="px-3 py-2 text-right font-mono text-xs font-medium">
