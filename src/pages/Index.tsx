@@ -249,6 +249,43 @@ const Index = () => {
           </div>
         )}
       </main>
+
+      <footer className="border-t border-border bg-muted/30 py-8 mt-auto">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6">
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <TrendingUp className="h-4 w-4" />
+              <span className="text-sm font-semibold">Tesouro Direto Benchmark</span>
+            </div>
+            
+            <div className="rounded-lg border border-border bg-card p-4 text-xs text-muted-foreground leading-relaxed">
+              <p className="font-semibold text-foreground mb-1">⚠️ Aviso Importante</p>
+              <p>
+                Este projeto tem caráter exclusivamente educacional e informativo. As informações, simulações e 
+                comparações apresentadas não constituem recomendação de investimento, oferta, análise ou 
+                consultoria financeira de qualquer tipo.
+              </p>
+              <p className="mt-2">
+                Os cálculos são baseados em dados públicos (como a taxa Selic do Banco Central) e nos dados 
+                fornecidos pelo próprio usuário, podendo conter imprecisões, simplificações ou defasagens.
+              </p>
+              <p className="mt-2">
+                O uso desta ferramenta é de inteira responsabilidade do usuário. Sempre considere consultar 
+                um profissional qualificado antes de tomar decisões financeiras.
+              </p>
+              <p className="mt-2">
+                Este projeto não possui qualquer vínculo com o Tesouro Direto, Banco Central do Brasil ou 
+                instituições financeiras.
+              </p>
+            </div>
+            
+            <div className="flex justify-between items-center text-[10px] text-muted-foreground mt-2">
+              <p>© {new Date().getFullYear()} • Desenvolvido para fins educacionais</p>
+              <p>v1.0.0</p>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };

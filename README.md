@@ -2,6 +2,9 @@
 
 ## [🚀 Acesse a aplicação aqui](https://jvoalmeida.github.io/Tesouro-Direto-Benchmark/)
 
+> [!IMPORTANT]
+> **Aviso Importante**: Este projeto tem caráter exclusivamente educacional e informativo. As informações, simulações e comparações apresentadas não constituem recomendação de investimento, oferta, análise ou consultoria financeira de qualquer tipo. Os cálculos são baseados em dados públicos (como a taxa Selic do Banco Central) e nos dados fornecidos pelo próprio usuário, podendo conter imprecisões, simplificações ou defasagens. O uso desta ferramenta é de inteira responsabilidade do usuário. Sempre considere consultar um profissional qualificado antes de tomar decisões financeiras. Este projeto não possui qualquer vínculo com o Tesouro Direto, Banco Central do Brasil ou instituições financeiras.
+
 Ferramenta para comparar o **valor de venda dos títulos do Tesouro Direto com marcação a mercado** em relação ao **valor que o título teria se estivesse rendendo apenas pela taxa Selic diária** desde a data de compra (dados do Banco Central). Isso permite avaliar se vale a pena vender antecipadamente ou manter o título até o vencimento.
 
 ## O que o app faz?
