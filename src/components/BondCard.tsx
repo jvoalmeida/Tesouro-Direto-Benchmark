@@ -85,19 +85,32 @@ export function BondCard({ extract, showValues }: BondCardProps) {
               {extract.title}
             </h3>
           </div>
-          <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+          <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-muted-foreground">
             <span className="flex items-center gap-1">
-              <Building2 className="h-3 w-3" />
+              <Building2 className="h-3.5 w-3.5" />
               {extract.broker}
             </span>
+            <span className="mx-0.5 opacity-30">•</span>
             <span className="flex items-center gap-1">
-              <Calendar className="h-3 w-3" />
+              <Calendar className="h-3.5 w-3.5" />
               Venc: {extract.maturityDate}
             </span>
+            <span className="mx-0.5 opacity-30">•</span>
             <span>{extract.purchases.length} compras</span>
+            <span className="mx-0.5 opacity-30">•</span>
             <span>Qtd: {maskValue(extract.totalQuantity.toFixed(2), showValues)}</span>
-            {avgRate && <span>Taxa Média: {avgRate}</span>}
-            {avgPrice && <span>Preço Médio: {maskValue(avgPrice, showValues)}</span>}
+            {avgPrice && (
+              <>
+                <span className="mx-0.5 opacity-30">•</span>
+                <span>Preço Médio: {maskValue(avgPrice, showValues)}</span>
+              </>
+            )}
+            {avgRate && (
+              <>
+                <span className="mx-0.5 opacity-30">•</span>
+                <span>Taxa Média: {avgRate}</span>
+              </>
+            )}
           </div>
         </div>
 
