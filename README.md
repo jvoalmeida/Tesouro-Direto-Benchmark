@@ -9,11 +9,13 @@ Ferramenta para comparar o **valor de venda dos títulos do Tesouro Direto com m
 
 ## O que o app faz?
 
-- **Importa extratos**: Lê as planilhas `.xls` exportadas do [Portal do Investidor](https://portalinvestidor.tesourodireto.com.br) e extrai automaticamente todos os dados de cada compra (título, corretora, quantidade, valor investido, taxa contratada, impostos, etc.).
+- **Importa extratos**: Lê as planilhas `.xlsx` exportadas do [Portal do Investidor](https://portalinvestidor.tesourodireto.com.br) e extrai automaticamente todos os dados de cada compra (título, corretora, quantidade, valor investido, taxa contratada, impostos, etc.).
+- **Integração com Preços de Mercado**: Busca automaticamente os preços unitários (PU) e taxas de venda diárias do Tesouro Direto através do portal Tesouro Transparente.
+- **Gráficos de Evolução**: Exibe gráficos interativos da evolução de preços de cada título em sua carteira, permitindo visualizar a valorização histórica.
 - **Atualiza pela Selic**: Busca a taxa Selic diária direto da API do Banco Central e calcula quanto cada compra renderia se fosse corrigida apenas pela Selic acumulada desde a data de aquisição.
-- **Compara Selic vs Mercado**: Mostra a diferença entre o valor bruto atualizado pelo mercado (dado do extrato) e o valor corrigido pela Selic, permitindo avaliar se o título está performando acima ou abaixo do CDI/Selic.
+- **Compara Selic vs Mercado**: Mostra a diferença entre o valor bruto atualizado pelo mercado (dado do extrato ou cotação atual) e o valor corrigido pela Selic, permitindo avaliar se o título está performando acima ou abaixo do benchmark.
 - **Painel consolidado**: Exibe um resumo geral com total investido, valor atualizado pela Selic, valor bruto de mercado e a diferença percentual.
-- **Detalhamento por título**: Para cada título do Tesouro, mostra corretora, vencimento, quantidade de compras e permite expandir para ver os detalhes de cada operação individual.
+- **Detalhamento por título**: Para cada título do Tesouro, mostra corretora, vencimento, quantidade de compras, preço médio e taxa média ponderada.
 - **Exportação CSV**: Permite exportar todos os dados consolidados em formato CSV para análise em planilhas.
 - **Armazenamento local**: Os dados importados são salvos no `localStorage` do navegador — nenhum dado é enviado para servidores externos.
 

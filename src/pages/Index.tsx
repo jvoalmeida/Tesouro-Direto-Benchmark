@@ -3,6 +3,7 @@ import { FileUpload } from "@/components/FileUpload";
 import { BondCard } from "@/components/BondCard";
 import { ConsolidatedSummary } from "@/components/ConsolidatedSummary";
 import { parseExtractFile } from "@/lib/parseExtract";
+import { processCSVBuffer } from "@/services/treasuryPriceService";
 import { loadExtracts, upsertExtract, clearAllExtracts } from "@/lib/store";
 import type { BondExtract } from "@/lib/types";
 import { fetchSelicRates, calculateSelicFactor, calculateSelicUpdatedValue, formatDateBR, type SelicEntry } from "@/lib/selic";
@@ -90,41 +91,60 @@ const Index = () => {
         }
       });
     }
-  }, []);
+  }, [loadSelic]);
 
   const handleFiles = async (files: { data: ArrayBuffer; fileName: string }[]) => {
     try {
       let allParsed: BondExtract[] = [];
-      for (const { data } of files) {
+      let loadedTreasuryCsv = false;
+      
+      for (const { data, fileName } of files) {
+        if (fileName.toLowerCase().endsWith(".csv")) {
+          await processCSVBuffer(data);
+          loadedTreasuryCsv = true;
+          continue;
+        }
+        
         const parsed = parseExtractFile(data);
         allParsed = allParsed.concat(parsed);
       }
 
-      if (allParsed.length === 0) {
-        toast.error("Nenhum dado de extrato encontrado nos arquivos.");
+      if (allParsed.length === 0 && !loadedTreasuryCsv) {
+        toast.error("Nenhum dado válido encontrado nos arquivos.");
         return;
       }
 
-      let updated = loadExtracts();
-      for (const extract of allParsed) {
-        updated = upsertExtract(extract);
+      if (loadedTreasuryCsv) {
+        toast.success("Histórico de Preços do Tesouro importado!");
+        // Force refresh of BondCards if we only imported a CSV
+        if (allParsed.length === 0 && extracts.length > 0) {
+          setExtracts([...extracts]);
+          return;
+        }
       }
 
-      let rates = selicRates;
-      if (rates.length === 0) {
-        rates = await loadSelic();
-      }
+      if (allParsed.length > 0) {
+        let updated = loadExtracts();
+        for (const extract of allParsed) {
+          updated = upsertExtract(extract);
+        }
 
-      if (rates.length > 0) {
-        setExtracts(enrichWithSelic(updated, rates));
-      } else {
-        setExtracts(updated);
-      }
+        let rates = selicRates;
+        if (rates.length === 0) {
+          rates = await loadSelic();
+        }
 
-      const titles = [...new Set(allParsed.map((p) => p.title))].join(", ");
-      toast.success(`Importado: ${titles}`, {
-        description: `${allParsed.reduce((s, p) => s + p.purchases.length, 0)} compras de ${files.length} arquivo(s)`,
-      });
+        if (rates.length > 0) {
+          setExtracts(enrichWithSelic(updated, rates));
+        } else {
+          setExtracts(updated);
+        }
+
+        const titles = [...new Set(allParsed.map((p) => p.title))].join(", ");
+        toast.success(`Importado: ${titles}`, {
+          description: `${allParsed.reduce((s, p) => s + p.purchases.length, 0)} compras de arquivos XLSX`,
+        });
+      }
     } catch (err) {
       console.error(err);
       toast.error("Erro ao processar os arquivos. Verifique o formato.");

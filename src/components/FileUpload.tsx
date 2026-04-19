@@ -42,15 +42,15 @@ export function FileUpload({ onFilesLoaded }: FileUploadProps) {
       <Upload className="h-8 w-8 text-primary" />
       <div className="text-center">
         <p className="font-heading text-sm font-semibold text-foreground">
-          Arraste os extratos aqui ou clique para selecionar
+          Arraste os arquivos aqui ou clique para selecionar
         </p>
         <p className="mt-1 text-xs text-muted-foreground">
-          Arquivos .xlsx do Tesouro Direto (múltiplos permitidos)
+          Extratos do Tesouro (.xlsx) ou Histórico de Preços (.csv)
         </p>
       </div>
       <input
         type="file"
-        accept=".xlsx,.xls"
+        accept=".xlsx,.xls,.csv"
         multiple
         className="hidden"
         onChange={(e) => {

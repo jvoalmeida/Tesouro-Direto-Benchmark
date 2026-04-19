@@ -4,7 +4,7 @@ import type { BondExtract, Purchase } from "./types";
 function parseNumber(val: unknown): number {
   if (typeof val === "number") return val;
   if (typeof val === "string") {
-    const cleaned = val.replace(/\./g, "").replace(",", ".").replace(/[^\d.\-]/g, "");
+    const cleaned = val.replace(/\./g, "").replace(",", ".").replace(/[^\d.-]/g, "");
     const n = parseFloat(cleaned);
     return isNaN(n) ? 0 : n;
   }
