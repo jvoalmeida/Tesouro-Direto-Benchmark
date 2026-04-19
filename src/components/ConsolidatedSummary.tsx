@@ -20,18 +20,27 @@ export function ConsolidatedSummary({ extracts, showValues }: ConsolidatedSummar
   const hasSelicData = totalSelicUpdated > 0;
 
   const cards = [
-    { label: "Total Investido (Compra)", value: maskValue(formatCurrency(totalInvested), showValues), color: "" },
+    { label: "Total Investido (Compra)", value: maskValue(formatCurrency(totalInvested), showValues), color: "", subColor: "" },
     ...(hasSelicData
       ? [
           {
             label: "Atualizado pela Selic",
             value: maskValue(formatCurrency(totalSelicUpdated), showValues),
-            sub: showValues ? `+${((totalSelicUpdated / totalInvested - 1) * 100).toFixed(2)}% desde a compra` : maskValue("", false),
+            sub: showValues ? `+${((totalSelicUpdated / totalInvested - 1) * 100).toFixed(2)}%` : maskValue("", false),
             color: "",
+            subColor: (totalSelicUpdated / totalInvested - 1) >= 0 ? "text-positive" : "text-negative",
           },
         ]
       : []),
-    { label: "Valor Bruto (Mercado)", value: maskValue(formatCurrency(totalGross), showValues), color: "" },
+    { 
+      label: "Valor Bruto (Mercado)", 
+      value: maskValue(formatCurrency(totalGross), showValues), 
+      sub: showValues 
+        ? `${(totalGross / totalInvested - 1) >= 0 ? "+" : ""}${((totalGross / totalInvested - 1) * 100).toFixed(2)}%` 
+        : maskValue("", false),
+      color: "",
+      subColor: (totalGross / totalInvested - 1) >= 0 ? "text-positive" : "text-negative",
+    },
     ...(hasSelicData
       ? [
           {
@@ -39,6 +48,7 @@ export function ConsolidatedSummary({ extracts, showValues }: ConsolidatedSummar
             value: showValues ? `${selicVsMarket >= 0 ? "+" : ""}${formatCurrency(selicVsMarket)}` : maskValue("", false),
             sub: showValues ? `${selicVsMarketPct >= 0 ? "+" : ""}${selicVsMarketPct.toFixed(2)}%` : maskValue("", false),
             color: selicVsMarket >= 0 ? "text-positive" : "text-negative",
+            subColor: selicVsMarketPct >= 0 ? "text-positive" : "text-negative",
           },
         ]
       : []),
@@ -46,20 +56,46 @@ export function ConsolidatedSummary({ extracts, showValues }: ConsolidatedSummar
 
   return (
     <div className={`grid grid-cols-1 gap-4 sm:grid-cols-2 ${hasSelicData ? "lg:grid-cols-4" : "lg:grid-cols-2"}`}>
-      {cards.map((c) => (
-        <div
-          key={c.label}
-          className="rounded-xl border border-border bg-card p-5 shadow-sm"
-        >
-          <p className="text-xs font-medium text-muted-foreground">{c.label}</p>
-          <p className={`mt-1 font-heading text-xl font-bold ${c.color || "text-card-foreground"}`}>
-            {c.value}
-          </p>
-          {c.sub && (
-            <p className={`mt-0.5 font-mono text-sm ${c.color || "text-muted-foreground"}`}>{c.sub}</p>
-          )}
-        </div>
-      ))}
+      {cards.map((c, i) => {
+        const isDifferenceCard = c.label.includes("Diferença");
+        const isPositive = c.color === "text-positive";
+        const isNegative = c.color === "text-negative";
+        
+        let cardBg = "bg-card";
+        let borderClass = "border-border";
+        
+        if (isDifferenceCard) {
+          if (isPositive) {
+            cardBg = "bg-positive/5";
+            borderClass = "border-positive/20";
+          } else if (isNegative) {
+            cardBg = "bg-negative/5";
+            borderClass = "border-negative/20";
+          }
+        }
+
+        return (
+          <div
+            key={c.label}
+            className={`relative overflow-hidden rounded-xl border ${borderClass} ${cardBg} p-5 shadow-sm transition-all hover:shadow-md`}
+          >
+            {isDifferenceCard && isPositive && (
+              <div className="absolute -right-4 -top-4 h-16 w-16 rounded-full bg-positive/10 blur-xl"></div>
+            )}
+            {isDifferenceCard && isNegative && (
+              <div className="absolute -right-4 -top-4 h-16 w-16 rounded-full bg-negative/10 blur-xl"></div>
+            )}
+            
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/80 relative z-10">{c.label}</p>
+            <p className={`mt-2 font-heading text-2xl font-bold tracking-tight ${c.color || "text-card-foreground"} relative z-10`}>
+              {c.value}
+            </p>
+            {c.sub && (
+              <p className={`mt-1 font-mono text-[13px] font-medium ${c.subColor || c.color || "text-muted-foreground"} relative z-10`}>{c.sub}</p>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }

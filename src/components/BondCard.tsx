@@ -131,105 +131,105 @@ export function BondCard({ extract, showValues }: BondCardProps) {
     <div className="rounded-xl border border-border bg-card shadow-sm">
       <button
         onClick={() => setOpen(!open)}
-        className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left transition-colors hover:bg-muted/30"
+        className="flex w-full flex-col lg:flex-row items-start lg:items-center justify-between gap-5 px-5 py-5 text-left transition-colors hover:bg-muted/30"
       >
-        <div className="flex-1 min-w-0">
+        {/* Bloco 1: Informações do Título */}
+        <div className="flex-1 min-w-0 w-full lg:w-auto">
           <div className="flex items-center gap-2">
-            <Landmark className="h-4 w-4 text-primary shrink-0" />
+            <Landmark className="h-5 w-5 text-primary shrink-0" />
             <h3 className="font-heading text-base font-bold text-card-foreground truncate">
               {extract.title}
             </h3>
           </div>
-          <div className="mt-1 space-y-1 text-[11px] text-muted-foreground">
-            <div className="flex flex-wrap items-center gap-x-2">
-              <span className="flex items-center gap-1">
-                <Building2 className="h-3.5 w-3.5" />
-                {extract.broker}
-              </span>
-              <span className="mx-0.5 opacity-30">•</span>
-              <span className="flex items-center gap-1">
-                <Calendar className="h-3.5 w-3.5" />
-                Venc: {extract.maturityDate}
-              </span>
-            </div>
-            <div className="flex flex-wrap items-center gap-x-2">
-              <span>{extract.purchases.length} compras</span>
-              <span className="mx-0.5 opacity-30">•</span>
-              <span>Qtd: {maskValue(extract.totalQuantity.toFixed(2), showValues)}</span>
-              {avgPrice && (
-                <>
-                  <span className="mx-0.5 opacity-30">•</span>
-                  <span>Preço Médio: {maskValue(avgPrice, showValues)}</span>
-                </>
-              )}
-              {avgRate && (
-                <>
-                  <span className="mx-0.5 opacity-30">•</span>
-                  <span>Taxa Média: {avgRate}</span>
-                </>
-              )}
-            </div>
+          <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+            <span className="flex items-center gap-1.5 font-medium">
+              <Building2 className="h-3.5 w-3.5" />
+              {extract.broker}
+            </span>
+            <span className="opacity-30">•</span>
+            <span className="flex items-center gap-1.5 font-medium">
+              <Calendar className="h-3.5 w-3.5" />
+              Venc: {extract.maturityDate}
+            </span>
+          </div>
+          <div className="mt-1.5 flex flex-wrap items-center gap-x-2 text-[10px] text-muted-foreground/80">
+            <span>{extract.purchases.length} compras</span>
+            <span className="opacity-30">•</span>
+            <span>Qtd: {maskValue(extract.totalQuantity.toFixed(2), showValues)}</span>
+            {avgPrice && (
+              <>
+                <span className="opacity-30">•</span>
+                <span>Preço Médio: {maskValue(avgPrice, showValues)}</span>
+              </>
+            )}
+            {avgRate && (
+              <>
+                <span className="opacity-30">•</span>
+                <span className="text-foreground/70 font-medium">Taxa Média: {avgRate}</span>
+              </>
+            )}
           </div>
         </div>
 
-        <div className="flex items-center gap-6 shrink-0">
-          {hasSelicData && (
-            <div className="text-right">
-              <p className="text-xs text-muted-foreground">Atualizado Selic</p>
-              <p className="font-mono text-sm font-semibold">{maskValue(formatCurrency(selicUpdated), showValues)}</p>
-            </div>
-          )}
-          <div className="text-right">
-            <p className="text-xs text-muted-foreground">Bruto (Mercado)</p>
-            <p className="font-mono text-sm font-semibold">{maskValue(formatCurrency(extract.totalGrossValue), showValues)}</p>
-          </div>
-          {hasSelicData && (
-            <div className="text-right min-w-[110px]">
-              <p className="text-xs text-muted-foreground">Diferença</p>
-              <p className={`font-mono text-sm font-bold ${showValues ? (diff >= 0 ? "text-positive" : "text-negative") : "text-muted-foreground"}`}>
-                {showValues ? (
-                  <>
-                    {diff >= 0 ? "+" : ""}{formatCurrency(diff)}
-                    <span className="ml-1 text-[10px] opacity-70">({diffPct >= 0 ? "+" : ""}{diffPct.toFixed(2)}%)</span>
-                  </>
-                ) : (
-                  maskValue("", false)
-                )}
+        {/* Blocos 2 e 3: Posição e Mercado */}
+        <div className="flex w-full lg:w-auto items-center justify-between lg:justify-end gap-5 shrink-0 overflow-x-auto pb-1 lg:pb-0 hide-scrollbar">
+          
+          {/* Bloco 2: Sua Posição */}
+          <div className="flex items-start gap-5 pr-5 lg:border-r border-border min-w-max">
+            <div className="text-left lg:text-right">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70 mb-1">Valor Bruto</p>
+              <p className="font-mono text-[15px] font-semibold text-foreground">
+                {maskValue(formatCurrency(extract.totalGrossValue), showValues)}
               </p>
             </div>
-          )}
 
-          {loadingPrice && (
-            <div className="flex flex-col items-end gap-1 border-l-[0.5px] border-border-tertiary pl-[18px]">
-               <div className="h-3 w-20 animate-pulse rounded bg-muted/40" />
-               <div className="flex items-center gap-6">
-                <div className="space-y-1">
-                  <div className="h-[14px] w-[50px] animate-pulse rounded bg-muted/50" />
-                  <div className="h-[14px] w-[40px] animate-pulse rounded bg-muted/50 ml-auto" />
+            {hasSelicData && (
+              <div className="text-left lg:text-right">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70 mb-1">Vs Selic</p>
+                <p className={`font-mono text-[15px] font-bold ${showValues ? (diff >= 0 ? "text-positive" : "text-negative") : "text-muted-foreground"}`}>
+                  {showValues ? (
+                    diff >= 0 ? `+${formatCurrency(diff)}` : formatCurrency(diff)
+                  ) : (
+                    maskValue("", false)
+                  )}
+                </p>
+                {showValues && (
+                  <p className={`text-[10px] mt-0.5 font-medium ${diff >= 0 ? 'text-positive' : 'text-negative'} opacity-80`}>
+                    {diffPct >= 0 ? "+" : ""}{diffPct.toFixed(2)}%
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Bloco 3: Mercado Hoje */}
+          <div className="flex items-center gap-3 min-w-max">
+            {loadingPrice ? (
+              <div className="flex items-center gap-4">
+                <div className="space-y-1.5 flex flex-col items-end">
+                  <div className="h-2.5 w-16 animate-pulse rounded bg-muted/40" />
+                  <div className="h-4 w-20 animate-pulse rounded bg-muted/50" />
                 </div>
-                <div className="space-y-1">
-                  <div className="h-[14px] w-[50px] animate-pulse rounded bg-muted/50" />
-                  <div className="h-[14px] w-[40px] animate-pulse rounded bg-muted/50 ml-auto" />
+                <div className="space-y-1.5 flex flex-col items-end">
+                  <div className="h-2.5 w-16 animate-pulse rounded bg-muted/40" />
+                  <div className="h-4 w-16 animate-pulse rounded bg-muted/50" />
                 </div>
               </div>
-            </div>
-          )}
-
-          {!loadingPrice && latestPrice && (
-            <div className="flex flex-col items-end gap-1 border-l-[0.5px] border-border-tertiary pl-[18px]">
-              <p className="text-[10px] uppercase font-bold text-muted-foreground/60 tracking-wider">
-                Mercado em {format(latestPrice.date, 'dd/MM')}
-              </p>
-              <div className="flex items-center gap-6">
+            ) : latestPrice ? (
+              <div className="flex items-center gap-4 bg-muted/30 px-3 py-2 rounded-lg border border-border/50">
                 <div className="text-right">
-                  <p className="text-[11px] text-muted-foreground">PU venda</p>
-                  <p className="font-mono text-sm font-semibold">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70 mb-0.5">
+                    PU Venda
+                    <span className="ml-1 opacity-50 lowercase font-normal">({format(latestPrice.date, 'dd/MM')})</span>
+                  </p>
+                  <p className="font-mono text-sm font-semibold text-foreground">
                     {maskValue(formatCurrency(latestPrice.puVenda), showValues)}
                   </p>
                 </div>
-                <div className="text-right">
-                  <p className="text-[11px] text-muted-foreground">Taxa venda</p>
-                  <p className="font-mono text-sm font-normal text-muted-foreground">
+                <div className="w-[1px] h-8 bg-border/50" />
+                <div className="text-right pl-1">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70 mb-0.5">Taxa Venda</p>
+                  <p className="font-mono text-[13px] font-medium text-foreground/80">
                     {( () => {
                       const title = extract.title.toLowerCase();
                       const rateStr = latestPrice.taxaVenda.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -240,33 +240,37 @@ export function BondCard({ extract, showValues }: BondCardProps) {
                   </p>
                 </div>
               </div>
-            </div>
-          )}
-          <div className="flex items-center gap-2">
-            <div
-              role="button"
-              tabIndex={0}
-              onClick={(e) => {
-                e.stopPropagation();
-                setShowChart(!showChart);
-              }}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
+            ) : null}
+
+            {/* Ações */}
+            <div className="flex items-center gap-1.5 ml-1">
+              <div
+                role="button"
+                tabIndex={0}
+                onClick={(e) => {
                   e.stopPropagation();
                   setShowChart(!showChart);
-                }
-              }}
-              className={`flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg transition-all duration-150 ${
-                showChart 
-                  ? "bg-info/10 text-info" 
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
-              }`}
-              title="Ver evolução de preços"
-            >
-              <LineChart className="h-4 w-4" />
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setShowChart(!showChart);
+                  }
+                }}
+                className={`flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg transition-all duration-150 ${
+                  showChart 
+                    ? "bg-info/15 text-info" 
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                }`}
+                title="Ver evolução de preços"
+              >
+                <LineChart className="h-4 w-4" />
+              </div>
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-all duration-150 bg-background/50 border border-border/40 hover:bg-muted hover:text-foreground">
+                {open ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+              </div>
             </div>
-            {open ? <ChevronDown className="h-4 w-4 text-muted-foreground" /> : <ChevronRight className="h-4 w-4 text-muted-foreground" />}
           </div>
         </div>
       </button>
