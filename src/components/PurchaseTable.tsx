@@ -35,7 +35,7 @@ export function PurchaseTable({ purchases, showValues }: PurchaseTableProps) {
                   Atualizado<br/>Selic
                 </th>
               )}
-              <th className="px-3 py-2.5 text-right font-semibold text-muted-foreground align-bottom leading-tight whitespace-nowrap">Valor Bruto<br/>(Mercado)</th>
+              <th className="px-3 py-2.5 text-right font-semibold text-muted-foreground align-bottom leading-tight whitespace-nowrap">Valor a<br/>Mercado</th>
               {hasSelicData && (
                 <th className="px-3 py-2.5 text-right font-semibold text-muted-foreground align-bottom leading-tight whitespace-nowrap">
                   Diferença<br/>(Vs Selic)
@@ -141,7 +141,7 @@ export function PurchaseTable({ purchases, showValues }: PurchaseTableProps) {
                 )}
 
                 <div>
-                  <p className="text-[10px] font-bold text-muted-foreground mb-0.5">Bruto (Mercado)</p>
+                  <p className="text-[10px] font-bold text-muted-foreground mb-0.5">Valor a Mercado</p>
                   <p className="font-mono text-sm font-bold">{maskValue(formatCurrency(p.grossValue), showValues)}</p>
                 </div>
                 {hasSelicData && (

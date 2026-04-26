@@ -20,20 +20,14 @@ export function ConsolidatedSummary({ extracts, showValues }: ConsolidatedSummar
   const hasSelicData = totalSelicUpdated > 0;
 
   const cards = [
-    { label: "Total Investido (Compra)", value: maskValue(formatCurrency(totalInvested), showValues), color: "", subColor: "" },
-    ...(hasSelicData
-      ? [
-          {
-            label: "Atualizado pela Selic",
-            value: maskValue(formatCurrency(totalSelicUpdated), showValues),
-            sub: showValues ? `+${((totalSelicUpdated / totalInvested - 1) * 100).toFixed(2)}%` : maskValue("", false),
-            color: "",
-            subColor: (totalSelicUpdated / totalInvested - 1) >= 0 ? "text-positive" : "text-negative",
-          },
-        ]
-      : []),
     { 
-      label: "Valor Bruto (Mercado)", 
+      label: "Valor Investido", 
+      value: maskValue(formatCurrency(totalInvested), showValues), 
+      color: "", 
+      subColor: "" 
+    },
+    { 
+      label: "Valor a Mercado", 
       value: maskValue(formatCurrency(totalGross), showValues), 
       sub: showValues 
         ? `${(totalGross / totalInvested - 1) >= 0 ? "+" : ""}${((totalGross / totalInvested - 1) * 100).toFixed(2)}%` 
@@ -44,7 +38,14 @@ export function ConsolidatedSummary({ extracts, showValues }: ConsolidatedSummar
     ...(hasSelicData
       ? [
           {
-            label: "Diferença (Mercado − Selic)",
+            label: "Atualizado pela Selic",
+            value: maskValue(formatCurrency(totalSelicUpdated), showValues),
+            sub: showValues ? `+${((totalSelicUpdated / totalInvested - 1) * 100).toFixed(2)}%` : maskValue("", false),
+            color: "",
+            subColor: (totalSelicUpdated / totalInvested - 1) >= 0 ? "text-positive" : "text-negative",
+          },
+          {
+            label: "Diferença (Vs Selic)",
             value: showValues ? `${selicVsMarket >= 0 ? "+" : ""}${formatCurrency(selicVsMarket)}` : maskValue("", false),
             sub: showValues ? `${selicVsMarketPct >= 0 ? "+" : ""}${selicVsMarketPct.toFixed(2)}%` : maskValue("", false),
             color: selicVsMarket >= 0 ? "text-positive" : "text-negative",

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import type { BondExtract } from "@/lib/types";
 import { maskValue } from "@/lib/utils";
 import { PurchaseTable } from "./PurchaseTable";
-import { ChevronDown, ChevronRight, Building2, Calendar, Landmark, LineChart } from "lucide-react";
+import { ChevronDown, ChevronRight, Building2, Calendar, Landmark, LineChart, Loader2 } from "lucide-react";
 import { getLatestPrice, getPriceHistory, type PricePoint } from "@/services/treasuryPriceService";
 import { format, parse, isAfter, isSameDay } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
@@ -177,7 +177,14 @@ export function BondCard({ extract, showValues }: BondCardProps) {
           {/* Bloco 2: Sua Posição */}
           <div className="flex items-start gap-5 pr-5 lg:border-r border-border min-w-max">
             <div className="text-left lg:text-right">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70 mb-1">Valor Bruto</p>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70 mb-1">Valor Investido</p>
+              <p className="font-mono text-[15px] font-semibold text-foreground">
+                {maskValue(formatCurrency(extract.totalInvested), showValues)}
+              </p>
+            </div>
+
+            <div className="text-left lg:text-right">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70 mb-1">Valor a Mercado</p>
               <p className="font-mono text-[15px] font-semibold text-foreground">
                 {maskValue(formatCurrency(extract.totalGrossValue), showValues)}
               </p>
@@ -205,15 +212,9 @@ export function BondCard({ extract, showValues }: BondCardProps) {
           {/* Bloco 3: Mercado Hoje */}
           <div className="flex items-center gap-3 min-w-max">
             {loadingPrice ? (
-              <div className="flex items-center gap-4">
-                <div className="space-y-1.5 flex flex-col items-end">
-                  <div className="h-2.5 w-16 animate-pulse rounded bg-muted/40" />
-                  <div className="h-4 w-20 animate-pulse rounded bg-muted/50" />
-                </div>
-                <div className="space-y-1.5 flex flex-col items-end">
-                  <div className="h-2.5 w-16 animate-pulse rounded bg-muted/40" />
-                  <div className="h-4 w-16 animate-pulse rounded bg-muted/50" />
-                </div>
+              <div className="flex items-center gap-2 bg-muted/20 px-3 py-2.5 rounded-lg border border-border/40">
+                <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
+                <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-tight">Carregando mercado...</span>
               </div>
             ) : latestPrice ? (
               <div className="flex items-center gap-4 bg-muted/30 px-3 py-2 rounded-lg border border-border/50">

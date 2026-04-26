@@ -8,7 +8,7 @@ import { loadExtracts, upsertExtract, clearAllExtracts } from "@/lib/store";
 import type { BondExtract } from "@/lib/types";
 import { fetchSelicRates, calculateSelicFactor, calculateSelicUpdatedValue, formatDateBR, type SelicEntry } from "@/lib/selic";
 import { toast } from "sonner";
-import { Trash2, TrendingUp, Loader2, Download, Eye, EyeOff } from "lucide-react";
+import { Trash2, TrendingUp, Loader2, Download, Eye, EyeOff, Search, Filter, X, ChevronDown } from "lucide-react";
 
 function enrichWithSelic(extracts: BondExtract[], rates: SelicEntry[]): BondExtract[] {
   const today = formatDateBR(new Date());
@@ -60,6 +60,8 @@ const Index = () => {
     const saved = localStorage.getItem("tesouro-benchmark-show-values");
     return saved !== "false";
   });
+  const [filterTitle, setFilterTitle] = useState("");
+  const [filterBroker, setFilterBroker] = useState("Todos");
 
   useEffect(() => {
     localStorage.setItem("tesouro-benchmark-show-values", String(showValues));
@@ -277,13 +279,91 @@ const Index = () => {
           <>
             <ConsolidatedSummary extracts={extracts} showValues={showValues} />
 
-            <div className="space-y-3">
-              <h2 className="font-heading text-base font-semibold text-foreground">
-                Títulos ({extracts.length})
-              </h2>
-              {extracts.map((ext) => (
-                <BondCard key={ext.id} extract={ext} showValues={showValues} />
-              ))}
+            <div className="space-y-4">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-card p-4 rounded-xl border border-border shadow-sm">
+                <div className="flex items-center gap-2">
+                  <Filter className="h-4 w-4 text-primary" />
+                  <h2 className="font-heading text-base font-semibold text-foreground">
+                    Filtrar Títulos
+                  </h2>
+                </div>
+                
+                <div className="flex flex-col sm:flex-row gap-3 flex-1 max-w-2xl">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <input
+                      type="text"
+                      placeholder="Buscar por título..."
+                      value={filterTitle}
+                      onChange={(e) => setFilterTitle(e.target.value)}
+                      className="w-full bg-background border border-border rounded-lg pl-9 pr-8 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all font-medium"
+                    />
+                    {filterTitle && (
+                      <button 
+                        onClick={() => setFilterTitle("")}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-muted text-muted-foreground transition-colors"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    )}
+                  </div>
+                  
+                  <div className="relative min-w-[160px]">
+                    <select
+                      value={filterBroker}
+                      onChange={(e) => setFilterBroker(e.target.value)}
+                      className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 appearance-none transition-all font-medium"
+                    >
+                      {["Todos", ...new Set(extracts.map(e => e.broker))].map(broker => (
+                        <option key={broker} value={broker}>{broker}</option>
+                      ))}
+                    </select>
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground">
+                      <ChevronDown className="h-4 w-4" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex items-center justify-between px-1">
+                  <h2 className="font-heading text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+                    Resultados ({extracts.filter(e => {
+                      const matchBroker = filterBroker === "Todos" || e.broker === filterBroker;
+                      const matchTitle = filterTitle === "" || e.title.toLowerCase().includes(filterTitle.toLowerCase());
+                      return matchBroker && matchTitle;
+                    }).length})
+                  </h2>
+                  {(filterTitle || filterBroker !== "Todos") && (
+                    <button 
+                      onClick={() => { setFilterTitle(""); setFilterBroker("Todos"); }}
+                      className="text-[10px] font-bold text-primary hover:underline uppercase tracking-tight"
+                    >
+                      Limpar Filtros
+                    </button>
+                  )}
+                </div>
+                
+                {extracts
+                  .filter(e => {
+                    const matchBroker = filterBroker === "Todos" || e.broker === filterBroker;
+                    const matchTitle = filterTitle === "" || e.title.toLowerCase().includes(filterTitle.toLowerCase());
+                    return matchBroker && matchTitle;
+                  })
+                  .map((ext) => (
+                    <BondCard key={ext.id} extract={ext} showValues={showValues} />
+                  ))}
+                
+                {extracts.filter(e => {
+                  const matchBroker = filterBroker === "Todos" || e.broker === filterBroker;
+                  const matchTitle = filterTitle === "" || e.title.toLowerCase().includes(filterTitle.toLowerCase());
+                  return matchBroker && matchTitle;
+                }).length === 0 && (
+                  <div className="text-center py-12 bg-muted/20 border border-dashed border-border rounded-xl">
+                    <p className="text-sm text-muted-foreground">Nenhum título encontrado com os filtros aplicados.</p>
+                  </div>
+                )}
+              </div>
             </div>
           </>
         )}
