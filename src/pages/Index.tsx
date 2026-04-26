@@ -3,7 +3,7 @@ import { FileUpload } from "@/components/FileUpload";
 import { BondCard } from "@/components/BondCard";
 import { ConsolidatedSummary } from "@/components/ConsolidatedSummary";
 import { parseExtractFile } from "@/lib/parseExtract";
-import { processCSVBuffer } from "@/services/treasuryPriceService";
+import { processCSVBuffer, ensureFullHistory } from "@/services/treasuryPriceService";
 import { loadExtracts, upsertExtract, clearAllExtracts } from "@/lib/store";
 import type { BondExtract } from "@/lib/types";
 import { fetchSelicRates, calculateSelicFactor, calculateSelicUpdatedValue, formatDateBR, type SelicEntry } from "@/lib/selic";
@@ -54,6 +54,8 @@ const Index = () => {
   const [selicRates, setSelicRates] = useState<SelicEntry[]>([]);
   const [selicLoading, setSelicLoading] = useState(false);
   const [selicError, setSelicError] = useState<string | null>(null);
+  const [treasuryLoading, setTreasuryLoading] = useState(false);
+  const [treasuryError, setTreasuryError] = useState<string | null>(null);
   const [showValues, setShowValues] = useState(() => {
     const saved = localStorage.getItem("tesouro-benchmark-show-values");
     return saved !== "false";
@@ -80,6 +82,22 @@ const Index = () => {
     }
   }, []);
 
+  const loadTreasury = useCallback(async () => {
+    setTreasuryLoading(true);
+    setTreasuryError(null);
+    try {
+      await ensureFullHistory();
+      return true;
+    } catch (err) {
+      console.error(err);
+      setTreasuryError("Falha ao carregar Tesouro");
+      // Don't show toast error here to avoid spamming since it might fail but app still works with cached data
+      return false;
+    } finally {
+      setTreasuryLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     const stored = loadExtracts();
     if (stored.length > 0) {
@@ -90,8 +108,9 @@ const Index = () => {
           setExtracts(stored);
         }
       });
+      loadTreasury();
     }
-  }, [loadSelic]);
+  }, [loadSelic, loadTreasury]);
 
   const handleFiles = async (files: { data: ArrayBuffer; fileName: string }[]) => {
     try {
@@ -208,6 +227,14 @@ const Index = () => {
                 )}
                 {selicError && (
                   <span className="ml-1 text-negative">• {selicError}</span>
+                )}
+                {treasuryLoading && (
+                  <span className="ml-1 flex items-center gap-1">
+                    • Tesouro <Loader2 className="h-3 w-3 animate-spin" />
+                  </span>
+                )}
+                {treasuryError && (
+                  <span className="ml-1 text-negative">• {treasuryError}</span>
                 )}
               </p>
             </div>

@@ -7,7 +7,7 @@ export interface SelicEntry {
 }
 
 const CACHE_KEY = "selic-daily-cache";
-const CACHE_TTL = 12 * 60 * 60 * 1000; // 12h
+const CACHE_TTL = 1 * 60 * 60 * 1000; // 1h
 
 function loadCache(): { ts: number; data: SelicEntry[] } | null {
   try {

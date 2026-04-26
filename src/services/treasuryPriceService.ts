@@ -3,7 +3,7 @@ import { parse, format, isAfter, subDays } from 'date-fns';
 
 const CSV_URL = "https://www.tesourotransparente.gov.br/ckan/dataset/df56aa42-484a-4a59-8184-7676580c81e3/resource/796d2059-14e9-44e3-80c9-2d9e30b405c1/download/precotaxatesourodireto.csv";
 const CACHE_KEY = 'td_price_history_v2'; // Changed key to avoid old data format conflicts
-const CACHE_TTL = 24 * 60 * 60 * 1000; // 24h
+const CACHE_TTL = 1 * 60 * 60 * 1000; // 1h
 
 export type PricePoint = {
   date: Date;
@@ -212,7 +212,7 @@ async function getFromCache(key: string): Promise<PricePoint[] | null> {
 let fullHistoryPromise: Promise<Record<string, PricePoint[]>> | null = null;
 let fullHistoryData: Record<string, PricePoint[]> | null = null;
 
-async function ensureFullHistory(): Promise<Record<string, PricePoint[]>> {
+export async function ensureFullHistory(): Promise<Record<string, PricePoint[]>> {
   if (fullHistoryData) return fullHistoryData;
   if (fullHistoryPromise) return fullHistoryPromise;
 
