@@ -10,13 +10,17 @@ import {
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { PricePoint } from '@/services/treasuryPriceService';
+import { TrendingUp, Download } from 'lucide-react';
+
+const CSV_DOWNLOAD_URL = "https://www.tesourotransparente.gov.br/ckan/dataset/df56aa42-484a-4a59-8184-7676580c81e3/resource/796d2059-14e9-44e3-80c9-2d9e30b405c1/download/precotaxatesourodireto.csv";
 
 interface BondChartProps {
   data: PricePoint[];
   bondType: string;
+  chartError?: boolean;
 }
 
-export function BondChart({ data, bondType }: BondChartProps) {
+export function BondChart({ data, bondType, chartError }: BondChartProps) {
   const formatCurrency = (val: number) =>
     val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
@@ -32,7 +36,35 @@ export function BondChart({ data, bondType }: BondChartProps) {
     return `${rateStr}% a.a.`;
   };
 
-  if (data.length === 0) return null;
+  if (data.length === 0) {
+    return (
+      <div className="flex h-[220px] w-full flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-border bg-muted/20 px-6 text-center">
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted/50">
+          <TrendingUp className="h-5 w-5 text-muted-foreground" />
+        </div>
+        <div className="space-y-1">
+          <p className="text-sm font-semibold text-foreground">
+            {chartError ? 'Não foi possível carregar o histórico de preços' : 'Histórico de preços não encontrado'}
+          </p>
+          <p className="text-xs text-muted-foreground max-w-sm">
+            {chartError
+              ? 'Os proxies falharam ao buscar os dados do Tesouro Transparente. '
+              : 'O título pode não constar no CSV do Tesouro Transparente ou o nome pode ser diferente. '}
+            Importe o arquivo CSV manualmente para ver o gráfico.
+          </p>
+        </div>
+        <a
+          href={CSV_DOWNLOAD_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-1.5 rounded-lg bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary transition-colors hover:bg-primary/20"
+        >
+          <Download className="h-3.5 w-3.5" />
+          Baixar CSV do Tesouro Transparente
+        </a>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full space-y-4">

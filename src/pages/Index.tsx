@@ -92,8 +92,8 @@ const Index = () => {
       return true;
     } catch (err) {
       console.error(err);
-      setTreasuryError("Falha ao carregar Tesouro");
-      // Don't show toast error here to avoid spamming since it might fail but app still works with cached data
+      setTreasuryError("Falha ao carregar preços do Tesouro Transparente");
+      // Only show toast once on manual retry, not on initial auto-load
       return false;
     } finally {
       setTreasuryLoading(false);
@@ -231,12 +231,30 @@ const Index = () => {
                   <span className="ml-1 text-negative">• {selicError}</span>
                 )}
                 {treasuryLoading && (
-                  <span className="ml-1 flex items-center gap-1">
-                    • Tesouro <Loader2 className="h-3 w-3 animate-spin" />
+                  <span className="ml-1 inline-flex items-center gap-1">
+                    • Carregando preços <Loader2 className="h-3 w-3 animate-spin" />
                   </span>
                 )}
-                {treasuryError && (
-                  <span className="ml-1 text-negative">• {treasuryError}</span>
+                {treasuryError && !treasuryLoading && (
+                  <span className="ml-1 inline-flex items-center gap-1.5 flex-wrap">
+                    <span className="text-negative">• {treasuryError}.</span>
+                    <button
+                      onClick={loadTreasury}
+                      className="text-primary underline underline-offset-2 hover:no-underline transition-all"
+                    >
+                      Tentar novamente
+                    </button>
+                    <span className="text-muted-foreground">ou</span>
+                    <a
+                      href="https://www.tesourotransparente.gov.br/ckan/dataset/df56aa42-484a-4a59-8184-7676580c81e3/resource/796d2059-14e9-44e3-80c9-2d9e30b405c1/download/precotaxatesourodireto.csv"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary underline underline-offset-2 hover:no-underline transition-all"
+                    >
+                      baixe o CSV manualmente
+                    </a>
+                    <span className="text-muted-foreground">e importe pelo app.</span>
+                  </span>
                 )}
               </p>
             </div>

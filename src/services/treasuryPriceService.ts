@@ -102,38 +102,66 @@ function parseCSVText(csvText: string): Promise<Record<string, PricePoint[]>> {
   });
 }
 
+const PROXY_TIMEOUT_MS = 20000; // 20s por proxy
+
+async function fetchWithTimeout(url: string, timeoutMs: number): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(url, { signal: controller.signal });
+    return res;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 async function fetchAndParseCSV(): Promise<Record<string, PricePoint[]>> {
-  const proxies = [
+  const urls: string[] = [];
+
+  // 1️⃣ Em desenvolvimento: proxy do Vite (sem CORS, requisição server-side)
+  if (import.meta.env.DEV) {
+    urls.push("/api/tesouro-csv");
+  }
+
+  // 2️⃣ Fallback para produção: proxies CORS públicos
+  urls.push(
     `https://api.allorigins.win/raw?url=${encodeURIComponent(CSV_URL)}`,
     `https://corsproxy.io/?${encodeURIComponent(CSV_URL)}`,
-    `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(CSV_URL)}`
-  ];
+    `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(CSV_URL)}`,
+    `https://thingproxy.freeboard.io/fetch/${CSV_URL}`,
+    `https://proxy.cors.sh/${CSV_URL}`,
+    `https://corsproxy.org/?${encodeURIComponent(CSV_URL)}`,
+  );
 
-  let response: Response | null = null;
-  
-  for (const proxyUrl of proxies) {
+  const errors: string[] = [];
+
+  for (const url of urls) {
     try {
-      console.log("Fetching Treasury data from:", proxyUrl);
-      const res = await fetch(proxyUrl);
+      console.log("Fetching Treasury data from:", url);
+      const res = await fetchWithTimeout(url, PROXY_TIMEOUT_MS);
       if (res.ok) {
-        response = res;
-        break;
+        const buffer = await res.arrayBuffer();
+        const csvText = new TextDecoder('iso-8859-1').decode(buffer);
+        return await parseCSVText(csvText);
       } else {
-        console.warn(`Proxy returned non-ok status: ${res.status}`);
+        const msg = `Retornou status ${res.status}: ${url}`;
+        console.warn(msg);
+        errors.push(msg);
       }
-    } catch (err) {
-      console.warn(`Proxy failed: ${proxyUrl}`, err);
+    } catch (err: any) {
+      const msg = err?.name === 'AbortError'
+        ? `Timeout (${PROXY_TIMEOUT_MS / 1000}s): ${url}`
+        : `Falha de rede: ${url} — ${err?.message}`;
+      console.warn(msg);
+      errors.push(msg);
     }
   }
 
-  if (!response) {
-    throw new Error("Failed to fetch Treasury data from all proxies. CORS or network error.");
-  }
-
-  const buffer = await response.arrayBuffer();
-  const csvText = new TextDecoder('iso-8859-1').decode(buffer);
-  
-  return await parseCSVText(csvText);
+  console.error("Todas as fontes falharam:\n" + errors.join("\n"));
+  throw new Error(
+    `Não foi possível baixar os dados do Tesouro Transparente. ` +
+    `Você pode importar o CSV manualmente: baixe em tesourotransparente.gov.br e arraste para a área de upload.`
+  );
 }
 
 // Allow manual upload of the CSV in case all proxies fail
