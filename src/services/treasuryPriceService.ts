@@ -102,6 +102,23 @@ function parseCSVText(csvText: string): Promise<Record<string, PricePoint[]>> {
   });
 }
 
+function parseStaticJson(
+  raw: Record<string, Array<{ date: string; puVenda: number; taxaVenda: number }>>
+): Record<string, PricePoint[]> {
+  const result: Record<string, PricePoint[]> = {};
+  for (const key in raw) {
+    result[key] = raw[key].map((item) => {
+      const [y, m, d] = item.date.split('-').map(Number);
+      return {
+        date: new Date(y, m - 1, d),
+        puVenda: item.puVenda,
+        taxaVenda: item.taxaVenda,
+      };
+    });
+  }
+  return result;
+}
+
 const PROXY_TIMEOUT_MS = 20000; // 20s por proxy
 
 async function fetchWithTimeout(url: string, timeoutMs: number): Promise<Response> {
@@ -116,42 +133,60 @@ async function fetchWithTimeout(url: string, timeoutMs: number): Promise<Respons
 }
 
 async function fetchAndParseCSV(): Promise<Record<string, PricePoint[]>> {
-  const urls: string[] = [];
-
-  // 1️⃣ Em desenvolvimento: proxy do Vite (sem CORS, requisição server-side)
-  if (import.meta.env.DEV) {
-    urls.push("/api/tesouro-csv");
+  // 1️⃣ Prioridade: dados estáticos incluídos no build (instantâneo, sem problemas de CORS ou rede)
+  try {
+    const staticUrl = `${import.meta.env.BASE_URL}data/treasury-data.json`;
+    console.log("Tentando carregar dados do Tesouro de:", staticUrl);
+    const staticRes = await fetch(staticUrl);
+    if (staticRes.ok) {
+      const jsonData = await staticRes.json();
+      const parsed = parseStaticJson(jsonData);
+      console.log(`Carregados dados do Tesouro para ${Object.keys(parsed).length} títulos.`);
+      return parsed;
+    }
+  } catch (err) {
+    console.warn("Não foi possível carregar o arquivo estático de preços:", err);
   }
 
-  // 2️⃣ Fallback para produção: proxies CORS públicos
-  urls.push(
+  const urls: { url: string; timeout: number }[] = [];
+
+  // 2️⃣ Em desenvolvimento: proxy do Vite (com timeout de 60s devido à lentidão do portal do Tesouro)
+  if (import.meta.env.DEV) {
+    urls.push({ url: "/api/tesouro-csv", timeout: 60000 });
+  }
+
+  // 3️⃣ Fallback para produção: proxies CORS públicos
+  const publicProxies = [
     `https://api.allorigins.win/raw?url=${encodeURIComponent(CSV_URL)}`,
     `https://corsproxy.io/?${encodeURIComponent(CSV_URL)}`,
     `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(CSV_URL)}`,
     `https://thingproxy.freeboard.io/fetch/${CSV_URL}`,
     `https://proxy.cors.sh/${CSV_URL}`,
     `https://corsproxy.org/?${encodeURIComponent(CSV_URL)}`,
-  );
+  ];
+  for (const p of publicProxies) {
+    urls.push({ url: p, timeout: PROXY_TIMEOUT_MS });
+  }
 
   const errors: string[] = [];
 
-  for (const url of urls) {
+  for (const item of urls) {
     try {
-      console.log("Fetching Treasury data from:", url);
-      const res = await fetchWithTimeout(url, PROXY_TIMEOUT_MS);
+      console.log("Fetching Treasury data from:", item.url);
+      const res = await fetchWithTimeout(item.url, item.timeout);
       if (res.ok) {
         const buffer = await res.arrayBuffer();
         const csvText = new TextDecoder('iso-8859-1').decode(buffer);
         return await parseCSVText(csvText);
       } else {
-        const msg = `Retornou status ${res.status}: ${url}`;
+        const msg = `Retornou status ${res.status}: ${item.url}`;
         console.warn(msg);
         errors.push(msg);
       }
     } catch (err: any) {
       const msg = err?.name === 'AbortError'
-        ? `Timeout (${PROXY_TIMEOUT_MS / 1000}s): ${url}`
-        : `Falha de rede: ${url} — ${err?.message}`;
+        ? `Timeout (${item.timeout / 1000}s): ${item.url}`
+        : `Falha de rede: ${item.url} — ${err?.message}`;
       console.warn(msg);
       errors.push(msg);
     }

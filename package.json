@@ -13,7 +13,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "update-data": "node scripts/update-treasury-data.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

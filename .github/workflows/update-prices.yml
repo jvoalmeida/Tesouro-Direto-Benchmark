@@ -1,0 +1,47 @@
+name: Atualizar Preços do Tesouro Direto
+
+on:
+  schedule:
+    # De segunda a sexta-feira às 22:00 UTC (19:00 Horário de Brasília)
+    - cron: '0 22 * * 1-5'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Baixar e atualizar dados do Tesouro
+        run: npm run update-data
+
+      - name: Commit dos dados atualizados
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add public/data/treasury-data.json
+          if git diff --staged --quiet; then
+            echo "Nenhuma alteração nos dados do Tesouro."
+          else
+            git commit -m "chore: atualiza dados diários do Tesouro Transparente [skip ci]"
+            git push origin main
+          fi
+
+      - name: Deploy no GitHub Pages
+        run: npm run deploy
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
