@@ -40,8 +40,13 @@ jobs:
             git push origin main
           fi
 
+      - name: Build do projeto
+        run: npm run build
+
+      - name: Configurar Git para deploy
+        run: |
+          git remote set-url origin https://git:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+
       - name: Deploy no GitHub Pages
-        run: npm run deploy
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx gh-pages -d dist --dotfiles
 
